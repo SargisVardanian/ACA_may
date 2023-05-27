@@ -13,12 +13,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_
 
 # Define the neural network model
 model = tf.keras.models.Sequential([
-<<<<<<< HEAD
     tf.keras.layers.Dense(64, activation="relu", input_shape=(X_train.shape[1],)),
-=======
-    tf.keras.layers.Dense(128, activation="relu", input_shape=(X_train.shape[1],)),
-    tf.keras.layers.Dense(32, activation="relu"),
->>>>>>> origin/main
     tf.keras.layers.Dropout(0.2),
     tf.keras.layers.Dense(128, activation="relu"),
     tf.keras.layers.Dropout(0.1),
