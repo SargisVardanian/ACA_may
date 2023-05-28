@@ -23,87 +23,88 @@ class Neuron:
             return y_pred
 
 
-import numpy as np
-
-
-class DenseLayer1:
-    def __init__(self, neurons=64, lr=0.01, max_iter=1000):
-        self.neurons = neurons
-        self.weights1 = None
-        self.weights2 = None
-        self.biases = None
-        self.lr = lr
-        self.max_iter = max_iter
-
-    def call(self, X, y=None, training=False):
-        if training:
-            X = np.insert(X, 0, 1, axis=1)
-            if self.weights1 is None:
-                self.weights1 = np.random.randn(X.shape[1], self.neurons)
-                self.weights2 = np.random.randn(self.neurons, y.shape[1])
-                self.biases = np.zeros((1, self.neurons))
-
-            for _ in range(self.max_iter):
-                hidden_output = np.dot(X, self.weights1) + self.biases
-                output = np.dot(hidden_output, self.weights2)
-                grad_output = -2 * (y - output) / X.shape[0]
-                grad_hidden = np.dot(grad_output, self.weights2.T)
-
-                self.weights2 -= self.lr * np.dot(hidden_output.T, grad_output)
-                self.weights1 -= self.lr * np.dot(X.T, grad_hidden)
-                self.biases -= self.lr * np.sum(grad_hidden, axis=0)
-
-                print('np.linalg.norm(grad_hidden)', np.linalg.norm(grad_hidden))
-
-                if np.linalg.norm(grad_hidden) < 0.1:
-                    break
-        else:
-            X = np.insert(X, 0, 1, axis=1)
-            hidden_output = np.dot(X, self.weights1) + self.biases
-            output = np.dot(hidden_output, self.weights2)
-            return output
-
-
 class DenseLayer:
-    def __init__(self, neurons=64):
+    def __init__(self, neurons=64,  lr=0.01, max_iter=1000):
         self.neurons = neurons
         self.weights = None
-        self.biases = None
+        self.previous_layer = None
+        self.max_iter = max_iter
+        self.lr = lr
 
-    def call(self, X, y=None, training=False):
-        if training:
-            X = np.insert(X, 0, 1, axis=1)
-            if self.weights is None:
-                self.weights = np.random.randn(X.shape[1], self.neurons)
-                self.biases = np.zeros((1, self.neurons))
+    def forward(self, X, weights=None, flag=False):
+        self.weights = np.random.randn(X.shape[1] + 1, self.neurons)
+        print('self.weights', self.weights.shape)
+        X= np.insert(X, 0, 1, axis=1)
+        if flag:
+            return X @ weights
+        return X @ self.weights
 
-            for _ in range(self.max_iter):
-                output = np.dot(X, self.weights) + self.biases
-                grad = (-2 * X.T @ (output - y)) / X.shape[0]
-                self.weights -= self.lr * grad
-                self.biases -= self.lr * np.sum(grad, axis=0)
-        else:
-            X = np.insert(X, 0, 1, axis=1)
-            output = np.dot(X, self.weights) + self.biases
-            return output
+    def backward(self, X, y, grad_outputs):
+        grad = np.dot(grad_outputs, self.weights.T)
+        grad_weights = np.dot(X.T, grad_outputs)
+        self.weights -= self.lr * grad_weights
+        return grad, self.weights
 
-layer = DenseLayer1(neurons=4, lr=0.1, max_iter=1000)
+
+class DenseNetwork:
+    def __init__(self, layer, max_iter=1000):
+        self.layers = layer
+        self.max_iter = max_iter
+
+    def forward(self, inputs, weights=None, flag=False):
+        outputs = inputs
+        self.inp_ar = []
+        for layer in self.layers:
+            outputs = layer.forward(outputs)
+            self.inp_ar.append(outputs)
+        if flag:
+            for layer in self.layers:
+                outputs = layer.forward(outputs, weights, flag=True)
+        return outputs
+
+    def backward(self, X, y, grad_outputs):
+        grad_inputs = grad_outputs
+        for layer in reversed(self.layers):
+            grad_inputs, weights = layer.backward(X, y, grad_inputs)
+        return grad_inputs, weights
+
+    def fit(self, X, y):
+        weights = []
+        y = y.reshape(-1, 1)  # Reshape y to match the shape of outputs
+        input = self.forward(X)
+        inp_ar = [input]
+        for _ in range(self.max_iter):
+            # for _ in self.layers:
+            input = self.forward(input)
+            print('input', input.shape)
+            inp_ar = self.inp_ar
+            # print('inp_ar', inp_ar[1])
+            for i in reversed(self.layers):
+                output = self.backward(X, y, inp_ar[i])
+                if i == self.layers[-1]:
+                    grad_outputs = output - y
+                else:
+                    grad_outputs -= output
+                weights.append(self.backward(X, y, grad_outputs)[1])
+            self.weights = weights
+    def predict(self, X):
+        return self.forward(X, self.weights, flag=True)
+
+
+
+layer1 = DenseLayer(neurons=64)
+
+layer2 = DenseLayer(neurons=4)
 
 iris = load_iris()
 
 X, X_test, y, y_test = train_test_split(iris.data, iris.target, test_size=0.2, random_state=42)
 
-# Generating some random training data
-np.random.seed(42)
-X = np.random.randn(100, 4)
-# print('inputs', X)
-y = np.random.randn(100, 1)
-# print('targets', y.shape[1])
+network = DenseNetwork([layer1,layer2])
 
 # Training the dense layer
-layer.call(X, y, training=True)
+network.fit(X, y)
 
-# Making predictions
-predictions = layer.call(X_test)
+predictions = network.predict(X_test)
 print("Predictions:")
 print(predictions, y_test)
