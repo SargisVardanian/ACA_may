@@ -102,13 +102,11 @@ class DenseNetwork:
         return model
 
 
-# Train the DenseNetwork implemented from scratch
 dense_net = DenseNetwork()
 
 dense_net.add_layer(DenseLayer(10, 10, activation='relu'))
 dense_net.add_layer(DenseLayer(10, 1, activation='relu'))
 
-# Train the DenseNetwork using gradient descent
 learning_rate = 0.0008
 num_epochs = 10000
 
@@ -121,5 +119,4 @@ dense_net.save_model('trained_model_ADAM.pkl')
 
 y_pred_dense = dense_net.forward(X_test)
 
-# Compare the results
 print("Mean Squared Error (DenseNetwork implemented from scratch):", dense_net.loss(X_test, y_test))
