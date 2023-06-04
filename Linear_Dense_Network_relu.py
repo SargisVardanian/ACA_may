@@ -121,9 +121,9 @@ num_epochs = 10000
 
 dense_net.fit(X_train, y_train, learning_rate, num_epochs)
 
-dense_net.save_model('trained_model.pkl')
+dense_net.save_model('trained_model_CNN.pkl')
 
-# loaded_model = D\enseNetwork.load_model('trained_model.pkl')
+# loaded_model = D\enseNetwork.load_model('trained_model_CNN.pkl')
 # y_pred_dense = loaded_model.forward(X_test)
 
 y_pred_dense = dense_net.forward(X_test)

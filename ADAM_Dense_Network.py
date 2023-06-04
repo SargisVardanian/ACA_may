@@ -125,9 +125,10 @@ class DenseNetwork:
 
 dense_net = DenseNetwork()
 input_dim = X_train.shape[1]
-dense_net.add_layer(DenseLayer(input_dim, 10, activation='relu'))
-dense_net.add_layer(DenseLayer(10, 5, activation='relu'))
-dense_net.add_layer(DenseLayer(5, 1, activation='relu'))
+dense_net.add_layer(DenseLayer(input_dim, 16, activation='relu'))
+dense_net.add_layer(DenseLayer(16, 10, activation='relu'))
+dense_net.add_layer(DenseLayer(10, 8, activation='relu'))
+dense_net.add_layer(DenseLayer(8, 1, activation='rel'))
 
 learning_rate = 0.0005
 num_epochs = 10000
@@ -136,7 +137,7 @@ dense_net.fit(X_train, y_train, learning_rate, num_epochs)
 #
 dense_net.save_model('trained_model_ADAM.pkl')
 
-# loaded_model = DenseNetwork.load_model('trained_model.pkl')
+# loaded_model = DenseNetwork.load_model('trained_model_CNN.pkl')
 # y_pred_dense = loaded_model.forward(X_test)
 
 y_pred_dense = dense_net.forward(X_test)

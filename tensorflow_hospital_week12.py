@@ -37,7 +37,6 @@ class SurvivalModel(tf.Module):
     def __call__(self, x):
         for layer in self.layers:
             x = layer(x)
-            # print('layer(x)', x)
         return x
 
     def loss_fn(self, y_true, y_pred):
