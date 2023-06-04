@@ -88,10 +88,10 @@ class SurvivalModel(tf.Module):
 
 model = SurvivalModel()
 input_dim = X_train.shape[1]  # Get the number of input features
-model.add_layer(input_dim=input_dim, output_dim=8)
-model.add_layer(input_dim=8, output_dim=4)
-model.add_layer(input_dim=4, output_dim=8)
-model.add_layer(input_dim=8, output_dim=1)
+model.add_layer(input_dim=input_dim, output_dim=16)
+model.add_layer(input_dim=16, output_dim=9)
+model.add_layer(input_dim=9, output_dim=9)
+model.add_layer(input_dim=9, output_dim=1)
 optimizer = tf.optimizers.Adam(learning_rate=0.0001)
 
 

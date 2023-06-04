@@ -6,10 +6,18 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 import pickle
 
-X, y = make_regression(n_samples=100, n_features=10, noise=0.5, random_state=42)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-y_train = y_train.reshape(-1, 1)
-y_test = y_test.reshape(-1, 1)
+import pandas as pd
+
+dataset = pd.read_csv("new_data.csv")
+
+X = dataset.drop('In-hospital_death', axis=1)
+y = dataset['In-hospital_death']
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+
+y_train = np.array(y_train).reshape(-1, 1)
+y_test = np.array(y_test).reshape(-1, 1)
 
 class DenseLayer:
     def __init__(self, input_size, output_size, activation='relu'):
@@ -103,16 +111,17 @@ class DenseNetwork:
 
 
 dense_net = DenseNetwork()
-
-dense_net.add_layer(DenseLayer(10, 10, activation='relu'))
-dense_net.add_layer(DenseLayer(10, 1, activation='relu'))
+input_dim = X_train.shape[1]
+dense_net.add_layer(DenseLayer(input_dim, 10, activation='relu'))
+dense_net.add_layer(DenseLayer(10, 5, activation='relu'))
+dense_net.add_layer(DenseLayer(5, 1, activation='relu'))
 
 learning_rate = 0.0008
 num_epochs = 10000
 
 dense_net.fit(X_train, y_train, learning_rate, num_epochs)
-#
-dense_net.save_model('trained_model_ADAM.pkl')
+
+dense_net.save_model('trained_model.pkl')
 
 # loaded_model = D\enseNetwork.load_model('trained_model.pkl')
 # y_pred_dense = loaded_model.forward(X_test)

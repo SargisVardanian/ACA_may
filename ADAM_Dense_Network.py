@@ -3,13 +3,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import numpy as np
 import pickle
+import pandas as pd
 
-X, y = make_regression(n_samples=100, n_features=10, noise=0.5, random_state=42)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-y_train = y_train.reshape(-1, 1)
-y_test = y_test.reshape(-1, 1)
+dataset = pd.read_csv("new_data.csv")
+
+X = dataset.drop('In-hospital_death', axis=1)
+y = dataset['In-hospital_death']
 
 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+
+y_train = np.array(y_train).reshape(-1, 1)
+y_test = np.array(y_test).reshape(-1, 1)
 
 class DenseLayer:
     def __init__(self, input_size, output_size, activation='relu'):
@@ -45,7 +50,6 @@ class DenseLayer:
         else:
             grad_weights = np.dot(self.inputs.T, grad_output)
             grad_biases = np.sum(grad_output, axis=0)
-
 
         self.t += 1
         self.m_w = self.beta1 * self.m_w + (1 - self.beta1) * grad_weights
@@ -120,11 +124,12 @@ class DenseNetwork:
 
 
 dense_net = DenseNetwork()
+input_dim = X_train.shape[1]
+dense_net.add_layer(DenseLayer(input_dim, 10, activation='relu'))
+dense_net.add_layer(DenseLayer(10, 5, activation='relu'))
+dense_net.add_layer(DenseLayer(5, 1, activation='relu'))
 
-dense_net.add_layer(DenseLayer(10, 10, activation='relu'))
-dense_net.add_layer(DenseLayer(10, 1, activation='relu'))
-
-learning_rate = 0.0008
+learning_rate = 0.0005
 num_epochs = 10000
 
 dense_net.fit(X_train, y_train, learning_rate, num_epochs)
